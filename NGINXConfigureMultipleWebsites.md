@@ -63,30 +63,22 @@ Configure Nginx to host multiple websites on a single server, each with its own 
 5. **Save and Close:**
    - Save the configuration file and close the text editor.
 
-6. **Add entry to hosts file:**
-
-   ```bash
-   echo "127.0.0.1 site1.com site2.com" | sudo tee /etc/hosts
-    ```
-
-7. **Test Configuration:**
+6. **Test Configuration:**
    - Test the Nginx configuration to ensure there are no syntax errors.
 
      ```bash
+     echo "127.0.0.1 site1.com site2.com" | sudo tee /etc/hosts
      sudo nginx -t
      ```
 
-8. **Reload Nginx:**
+7. **Reload Nginx:**
    - If the test is successful, reload Nginx to apply the changes.
 
      ```bash
      sudo systemctl reload nginx
      ```
 
-9. **Configure DNS:**
-   - Update the DNS records for each domain (`site1.com` and `site2.com`) to point to your server's IP address.
-
-10. **Verify Websites:**
+8. **Verify Websites:**
 
 - Open a web browser and navigate to `site1.com` and `site2.com`. You should see the respective "Welcome" messages.
 
