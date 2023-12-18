@@ -38,66 +38,56 @@ Set up load balancing with NGINX to distribute incoming traffic among multiple s
 
          server {
              listen 80;
+             server_name your-domain.com;
+
              location / {
                  proxy_pass http://backend_servers;
-                 # Additional configuration...
+                 proxy_set_header Host $host;
+                 proxy_set_header X-Real-IP $remote_addr;
+                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                 proxy_set_header X-Forwarded-Proto $scheme;
              }
          }
      }
      ```
 
-4. **Load Balancing Algorithms:**
-   - Choose a load balancing algorithm based on your requirements.
-   - Example: Round Robin
-
-     ```nginx
-     http {
-         upstream backend_servers {
-             round-robin;
-             server 127.0.0.1:8081;
-             server 127.0.0.1:8082;
-             server 127.0.0.1:8083;
-             # Add more servers as needed...
-         }
-
-         server {
-             listen 80;
-             location / {
-                 proxy_pass http://backend_servers;
-                 # Additional configuration...
-             }
-         }
-     }
-     ```
-
-5. **Health Checks (Optional):**
+4. **Health Checks (Optional):**
    - Implement health checks to ensure servers are available.
    - Example:
 
      ```nginx
      http {
          upstream backend_servers {
-             server 127.0.0.1:8081;
-             server 127.0.0.1:8082;
-             server 127.0.0.1:8083;
-
-             health_check;
+             server 127.0.0.1:8081 max_fails=3 fail_timeout=30s;
+             server 127.0.0.1:8082 max_fails=3 fail_timeout=30s;
+             server 127.0.0.1:8083 max_fails=3 fail_timeout=30s;
              # Add more servers as needed...
          }
 
          server {
              listen 80;
+             server_name your-domain.com;
+             
              location / {
                  proxy_pass http://backend_servers;
-                 # Additional configuration...
+                 proxy_set_header Host $host;
+                 proxy_set_header X-Real-IP $remote_addr;
+                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                 proxy_set_header X-Forwarded-Proto $scheme;
              }
          }
      }
      ```
 
-6. **Testing:**
+5. **Testing:**
    - Access your application through the NGINX load balancer URL.
    - Monitor NGINX logs for distribution and check backend server logs for incoming requests.
+
+     ```
+     echo "127.0.0.1 your-domain.com" | sudo tee /etc/hosts
+     sudo nginx -t
+     sudo systemctl nginx restart
+     ```   
 
 ## Conclusion
 

@@ -10,7 +10,7 @@ Configure Nginx to host multiple websites on a single server, each with its own 
 
 1. **Install Nginx:**
    - If you haven't installed Nginx, do so based on your operating system. For example:
-     - Ubuntu/Debian: `sudo apt-get install nginx`
+     - Ubuntu/Debian: `sudo apt-get install nginx -y`
      - CentOS: `sudo yum install nginx`
 
 2. **Create Website Directories:**
