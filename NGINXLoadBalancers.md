@@ -86,7 +86,7 @@ Set up load balancing with NGINX to distribute incoming traffic among multiple s
      ```
      echo "127.0.0.1 your-domain.com" | sudo tee /etc/hosts
      sudo nginx -t
-     sudo systemctl nginx reload
+     sudo systemctl reload nginx
      ```   
 
 ## Conclusion
