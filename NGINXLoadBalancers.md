@@ -24,16 +24,13 @@ Set up load balancing with NGINX to distribute incoming traffic among multiple s
    - Repeat for app_server2 and app_server3.
 
 3. **Configure NGINX Load Balancer:**
-   - On the NGINX load balancer server, configure NGINX to act as a load balancer.
-   - Example NGINX configuration:
+   - Add configuration inside the `http` block.
 
      ```nginx
-     http {
          upstream backend_servers {
              server 127.0.0.1:8081;
              server 127.0.0.1:8082;
              server 127.0.0.1:8083;
-             # Add more servers as needed...
          }
 
          server {
@@ -48,20 +45,16 @@ Set up load balancing with NGINX to distribute incoming traffic among multiple s
                  proxy_set_header X-Forwarded-Proto $scheme;
              }
          }
-     }
      ```
 
 4. **Health Checks (Optional):**
    - Implement health checks to ensure servers are available.
-   - Example:
 
      ```nginx
-     http {
          upstream backend_servers {
              server 127.0.0.1:8081 max_fails=3 fail_timeout=30s;
              server 127.0.0.1:8082 max_fails=3 fail_timeout=30s;
              server 127.0.0.1:8083 max_fails=3 fail_timeout=30s;
-             # Add more servers as needed...
          }
 
          server {
@@ -76,7 +69,6 @@ Set up load balancing with NGINX to distribute incoming traffic among multiple s
                  proxy_set_header X-Forwarded-Proto $scheme;
              }
          }
-     }
      ```
 
 5. **Testing:**
@@ -87,8 +79,8 @@ Set up load balancing with NGINX to distribute incoming traffic among multiple s
      echo "127.0.0.1 your-domain.com" | sudo tee /etc/hosts
      sudo nginx -t
      sudo systemctl reload nginx
-     ```   
+     ```
 
-## Conclusion
+6. **Cleanup:**
 
-This practice lab provides a basic setup for load balancing with NGINX. Explore additional load balancing algorithms, SSL termination, and health check configurations for a comprehensive understanding.
+- Remove added configuration from point `3` or `4`.

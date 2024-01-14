@@ -134,8 +134,12 @@ Set up a simple CDN using NGINX to improve content delivery and reduce latency.
      ```bash
      echo "127.0.0.1 cdn.example.com" | sudo tee /etc/hosts
      sudo nginx -t
-     sudo systemctl restart nginx
+     sudo systemctl reload nginx
      ```
 
    - Access your content through the CDN URLs (cdn.example.com).
    - Use browser developer tools or online tools to confirm CDN usage.
+
+5. **Cleanup:**
+
+- Remove added configuration from point `3`.
