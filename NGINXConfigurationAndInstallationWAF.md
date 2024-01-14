@@ -21,7 +21,7 @@ Configure NGINX and install a Web Application Firewall (WAF) to enhance the secu
      sudo apt-get install bison build-essential ca-certificates curl dh-autoreconf doxygen \
      flex gawk git iputils-ping libcurl4-gnutls-dev libexpat1-dev libgeoip-dev liblmdb-dev \
      libpcre3-dev libpcre++-dev libssl-dev libtool libxml2 libxml2-dev libyajl-dev locales \
-     lua5.3-dev pkg-config wget zlib1g-dev zlibc libxslt1-dev libgd-dev
+     lua5.3-dev pkg-config wget zlib1g-dev libxslt1-dev libgd-dev
      ```
 
 2. **Clone the ModSecurity Github repository from the /opt directory:**
@@ -184,21 +184,19 @@ Configure NGINX and install a Web Application Firewall (WAF) to enhance the secu
       sudo cp /opt/ModSecurity/modsecurity.conf-recommended /etc/nginx/modsec/modsecurity.conf
      ```
 
-3. **Remove the `.recommended` extension from the ModSecurity configuration filename with the following command:**
+3. **Change the value for `SecRuleEngine` to `On` in `/etc/modsecurity/modsecurity.conf`**
 
      ```bash
-      sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf
+      sudo sed -i 's/SecRuleEngine/On/g' /etc/modsecurity/modsecurity.conf
      ```
 
-4. **Change the value for `SecRuleEngine` to `On` in `/etc/modsecurity/modsecurity.conf`**
-
-5. **Create a new configuration file called `main.conf` under the `/etc/nginx/modsec` directory:**
+4. **Create a new configuration file called `main.conf` under the `/etc/nginx/modsec` directory:**
 
      ```bash
       sudo touch /etc/nginx/modsec/main.conf
      ```
 
-6. **Specify the rules and the Modsecurity configuration file for Nginx by inserting following lines:**
+5. **Specify the rules and the Modsecurity configuration file for Nginx by inserting following lines:**
 
      ```bash
       Include /etc/nginx/modsec/modsecurity.conf
@@ -218,7 +216,8 @@ Configure NGINX and install a Web Application Firewall (WAF) to enhance the secu
 2. **Restart the nginx service to apply the configuration:**
 
      ```bash
-      sudo systemctl restart nginx
+     sudo nginx -t
+     sudo systemctl reload nginx   
      ```
 
 ### Testing ModSecurity

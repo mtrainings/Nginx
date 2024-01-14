@@ -50,18 +50,12 @@ Configure Nginx as a reverse proxy to forward requests to backend servers for en
      ```bash
      echo "127.0.0.1 example-domain.com" | sudo tee /etc/hosts
      sudo nginx -t
-     ```
-
-5. **Reload Nginx:**
-   - If the test is successful, reload Nginx to apply the changes.
-
-     ```bash
      sudo systemctl reload nginx
      ```
 
-6. **Verify Reverse Proxy:**
+5. **Verify Reverse Proxy:**
    - Open a web browser and navigate to `example-domain.com`. Requests should be forwarded to the backend server.
 
-## Conclusion
+6. **Cleanup:**
 
-This lab guides you through configuring Nginx as a reverse proxy to forward requests to backend servers. It includes setting up backend servers, configuring Nginx as a reverse proxy, testing the configuration, and exploring additional proxy directives for advanced features.
+- Remove added configuration from point `3`.

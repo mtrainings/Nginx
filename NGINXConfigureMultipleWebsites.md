@@ -82,6 +82,6 @@ Configure Nginx to host multiple websites on a single server, each with its own 
 
 - Open a web browser and navigate to `site1.com` and `site2.com`. You should see the respective "Welcome" messages.
 
-## Conclusion
+9. **Cleanup:**
 
-This lab guides you through configuring Nginx to host multiple websites on a single server. Each website is assigned its own domain, and Nginx is configured with separate server blocks to handle the traffic for each site.
+- Remove added configuration from point 4.

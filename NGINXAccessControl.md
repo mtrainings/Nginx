@@ -32,7 +32,7 @@ Configure Nginx to restrict access to a specific location using both access list
      sudo nano /etc/nginx/nginx.conf
      ```
 
-   - Add the following configuration inside the `server` block:
+   - Add the following configuration inside the `http` block:
 
      ```nginx
      server {
@@ -48,30 +48,24 @@ Configure Nginx to restrict access to a specific location using both access list
      }
      ```
 
+   - Adjust network range according to the address where you are:
+
 5. **Save and Close:**
    - Save the configuration file and close the text editor.
 
-6. **Test Configuration:**
-   - Test the Nginx configuration to ensure there are no syntax errors.
-
-     ```bash
-     sudo nginx -t
-     ```
-
-7. **Test Access:**
+6. **Test Access:**
    - Open a web browser and try to access the `/private` location on your server. You should be prompted for credentials.
    - Use the username `user1` and the password you set during the `htpasswd` creation.
 
-     ```
+     ```bash
      echo "127.0.0.1 your-domain.com" | sudo tee /etc/hosts
      sudo nginx -t
-     sudo systemctl nginx restart
+     sudo systemctl reload nginx
      ```  
 
-8. **Verify Access List:**
+7. **Verify Access List:**
    - Test access from both the allowed IP range (192.168.1.0/24) and a denied IP range to ensure that access lists are working as expected.
 
+6. **Cleanup:**
 
-## Conclusion
-
-This lab guides you through configuring Nginx to restrict access to a specific location using Basic Authentication and access lists. This combination provides an added layer of security by requiring valid credentials and controlling access based on IP addresses.
+- Remove added configuration from point `4`.
