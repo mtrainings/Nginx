@@ -106,6 +106,8 @@ Replace the `/assets/` and image locations of the shop (you can drop the `X-Loca
 
    ✅ **Checkpoint:** `MISS` then `HIT, HIT, HIT` – and always the **same** `Name`, although round robin is active. That's the cache answering.
 
+   Repeating the lab later? The cache lives on a Docker volume and survives restarts, so the first answer may be `EXPIRED` or `STALE` (an old copy older than 30 s) instead of `MISS`. Use a new path such as `/catalog/2` to see a clean `MISS`.
+
 4. Bypass: `curl -sI -H "X-No-Cache: 1" http://api.localtest.me/catalog/ | grep -i x-cache` → `BYPASS`.
 5. **Cache as a safety net** – stop all API instances:
 

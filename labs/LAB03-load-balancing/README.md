@@ -175,3 +175,4 @@ While it runs, stop and start an API instance. Compare the status code distribut
 | `invalid parameter "resolve"` | upstream without `zone`, or nginx older than 1.27.3 |
 | all requests go to one server | `hash` with an empty key (no `X-User` header) |
 | 502 after restarting a container | stale IP – see Step 5 |
+| Step 6 answers `api temporarily unavailable` instead of the backup JSON | the instances went down one by one, their names no longer resolve and the error log shows `no live upstreams` – start all three, wait ~15 s, then stop them together |

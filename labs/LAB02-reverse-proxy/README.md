@@ -126,7 +126,7 @@ WebSockets start as HTTP/1.1 with `Upgrade: websocket`. These headers are *hop-b
    ```bash
    curl -i -N --http1.1 \
      -H "Connection: Upgrade" -H "Upgrade: websocket" \
-     -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
+     -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
      http://api.localtest.me/echo
    ```
 

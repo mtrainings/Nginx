@@ -46,7 +46,7 @@ if [[ $okc -eq 10 ]] && grep -q 429 <<<"$codes" && ! grep -q 503 <<<"$codes"; th
 # BF7
 l=$(req bf7.localtest.me -i -N --max-time 2 \
       -H 'Connection: Upgrade' -H 'Upgrade: websocket' \
-      -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==' \
+      -H 'Sec-WebSocket-Version: 13' -H 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
       http://bf7.localtest.me/echo | head -n 1)
 grep -q ' 101' <<<"$l" && ok "BF7 WebSocket" || bad "BF7 WebSocket (got: ${l%$'\r'})"
 
