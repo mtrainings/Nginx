@@ -1,60 +1,88 @@
-# NGINX Labs
+# NGINX in Practice – Hands-on Labs
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![alt text](images/nginx_logo.png)
+![NGINX](images/nginx_logo.png)
 
-## Introduction
+Eleven labs that turn a bare NGINX container into the production-ready edge of **PixelShop**, a fictional online shop. Every lab builds on the previous one – same environment, same story, real tools.
 
-Welcome to the NGINX training labs! This series of exercises is designed to enhance your understanding and skills in configuring NGINX for various scenarios. Each lab focuses on a specific aspect of NGINX configuration and usage, providing hands-on experience to reinforce your knowledge.
+```mermaid
+flowchart LR
+  U[clients] -->|HTTP/1.1, HTTP/2, HTTP/3| E[edge<br/>NGINX 1.30]
+  E --> S[(static shop)]
+  E --> API[api-1 / api-2 / api-3]
+  E --> R[(redis-a / redis-b)]
+  E --> W[WAF: ModSecurity + CRS] --> J[Juice Shop]
+  E --> M[Prometheus exporter]
+```
 
-## Content
+## Labs
 
-### 1.[NGINX Configure Multiple Websites](LAB01/NGINXConfigureMultipleWebsites.md)
-
-   In this lab, you will learn how to configure NGINX to host multiple websites on a single server. Understand the process of setting up virtual hosts and managing multiple domains efficiently.
-
-### 2.[NGINX Revese Proxy Setup](LAB02/NGINXReveseProxySetup.md)
-
-   Explore the world of reverse proxy setups with NGINX. Learn how to efficiently route incoming requests to backend servers, improving performance, and enhancing security.
-
-### 3.[NGINX Load Balancers](LAB03/NGINXLoadBalancers.md)
-
-   Dive into the concept of load balancing using NGINX. Discover how to distribute incoming traffic across multiple servers to optimize resource utilization and ensure high availability.
-
-### 4.[NGINX As CDN](LAB04/NGINXAsCDN.md)
-
-   In this lab, explore the capabilities of NGINX as a Content Delivery Network (CDN). Learn how to leverage NGINX to accelerate content delivery and improve the overall user experience.
-
-### 5.[NGINX Access Control](LAB05/NGINXAccessControl.md)
-
-   Secure your web applications by understanding NGINX access control mechanisms. Explore how to restrict access based on IP addresses, implement authentication, and enhance the overall security of your NGINX server.
-
-### 6.[NGINX Logging](LAB06/NGINXLogging.md)
-
-   Delve into NGINX logging and monitoring. Learn how to configure and analyze logs effectively to gain insights into server performance, troubleshoot issues, and make informed decisions.
-
-### 7.[NGINX Build Dynamic And Static Module](LAB07/NGINXBuildDynamicAndStaticModule.md)
-
-   Gain a deeper understanding of NGINX modules by learning how to build both dynamic and static modules. Explore the flexibility and customization options offered by NGINX through module development.
-
-### 8.[NGINX Configuration And Installation WAF](LAB08/NGINXConfigurationAndInstallationWAF.md)
-
-   Explore the world of Web Application Firewalls (WAF) with NGINX. Learn how to configure and install a WAF to protect your web applications from common security threats.
+| # | Lab | You will… | Time |
+|---|---|---|---|
+| 01 | [Virtual hosts & locations](labs/LAB01-virtual-hosts/README.md) | start the environment, host two sites, master location matching | 35 min |
+| 02 | [Reverse proxy](labs/LAB02-reverse-proxy/README.md) | proxy an API, forward client details, handle timeouts, proxy WebSockets | 35 min |
+| 03 | [Load balancing](labs/LAB03-load-balancing/README.md) | balance 3 instances, survive a crash, sticky routing, re-resolve DNS | 40 min |
+| 04 | [Caching & compression](labs/LAB04-caching-compression/README.md) | gzip, browser caching, proxy cache with stale-on-error | 40 min |
+| 05 | [TLS, HTTP/2 & HTTP/3](labs/LAB05-tls-http3/README.md) | modern TLS, redirects, QUIC, HSTS | 40 min |
+| 06 | [Access control & rate limiting](labs/LAB06-access-control/README.md) | basic auth + IP rules, `auth_request`, rate limits, security headers | 45 min |
+| 07 | [Logging & monitoring](labs/LAB07-logging-monitoring/README.md) | JSON logs, request IDs, Prometheus metrics, GoAccess dashboard | 40 min |
+| 08 | [TCP/UDP with stream](labs/LAB08-stream-tcp-udp/README.md) | L4 load balancing and failover for Redis, UDP DNS proxy | 25 min |
+| 09 | [Modules & njs](labs/LAB09-modules-njs/README.md) | JavaScript at the edge, build a dynamic module for the exact NGINX version | 40 min |
+| 10 | [WAF: attack & defend](labs/LAB10-waf/README.md) | SQLi/XSS against Juice Shop, ModSecurity v3 + OWASP CRS, tuning | 45 min |
+| 11 | [Break-fix challenge](labs/LAB11-break-fix/README.md) | fix 8 broken production configs, scored automatically | 40 min |
 
 ## Prerequisites
 
-- **Basic Web Server Concepts**: Ensure you have a fundamental understanding of web server concepts, including HTTP, virtual hosts, and server configurations.
-- **Linux Command Line Familiarity**: Be comfortable using the Linux command line, as most NGINX installations and configurations are performed through the terminal.
-- **NGINX Installed**: Have NGINX installed on your server. You can set up a virtual machine or use a cloud instance for this purpose. Refer to the [official NGINX documentation](https://nginx.org/en/docs/) for installation instructions.
-- **Text Editor**: Have a text editor installed on your server for editing NGINX configuration files. Popular choices include nano, vim, or Visual Studio Code.
-- **Server Access**: Ensure you have access to a server with the necessary permissions to install and configure software. If using a virtual machine or a cloud instance, make sure you can connect to it securely.
-- **Internet Connection**: A stable internet connection is required to download and install NGINX packages, explore documentation, and potentially access additional resources during the labs.
-- **Basic Networking Knowledge**: Understand basic networking concepts, including IP addresses, ports, and domain names, as they play a crucial role in NGINX configurations.
+- Linux VM (Ubuntu 24.04 recommended), 2 vCPU, 4 GB RAM, 15 GB disk
+- Docker Engine with the Compose plugin (`docker compose version`), user in the `docker` group
+- `curl`, `jq`, `openssl`, `git` – `sudo apt install -y curl jq openssl git dnsutils`
+- Free ports on the VM: 80, 443 (TCP+UDP), 8080, 6379, 5353/udp, 9113
+- Comfortable with the Linux shell and basic HTTP
+
+Host names use `*.localtest.me` (public DNS → `127.0.0.1`). Working from your laptop against a remote VM? Use an SSH tunnel or replace the names with `<name>.<VM-IP>.nip.io`.
+
+## Quick start
+
+```bash
+git clone <this repository> nginx-labs && cd nginx-labs
+chmod +x bin/*
+./bin/ngx up
+curl -i http://localtest.me/
+```
+
+## The `ngx` helper
+
+| Command | What it does |
+|---|---|
+| `./bin/ngx up` / `down` / `ps` | start / stop / list the environment |
+| `./bin/ngx test` | `nginx -t` |
+| `./bin/ngx reload` | `nginx -t` and graceful reload |
+| `./bin/ngx dump` | `nginx -T` – the full effective configuration |
+| `./bin/ngx logs [name]` | follow `env/logs/<name>.log` |
+| `./bin/ngx certs` | create the local CA and `*.localtest.me` certificate |
+| `./bin/ngx catchup <N>` | **fell behind?** load the solution of lab N (your files are backed up) |
+| `./bin/ngx breakfix` / `check` | LAB11 challenge |
+
+## Repository layout
+
+```
+env/                    everything the containers use
+  docker-compose.yml
+  nginx/nginx.conf      main config (do not edit)
+  nginx/conf.d/         http-level config - this is where you work
+  nginx/snippets/       reusable include files
+  nginx/stream.d/       stream (TCP/UDP) config - LAB08
+  nginx/modules-enabled load_module lines - LAB09
+  nginx/njs/            JavaScript for njs - LAB09
+  www/                  static content
+  logs/                 NGINX logs (mounted)
+labs/                   lab instructions
+solutions/LABnn/        state of the config after each lab
+break-fix/              LAB11 broken configs
+bin/                    helper scripts
+```
+
+All solutions are validated with `nginx -t` against NGINX 1.30.
 
 ## License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
-
-## Contribution
-
-Feel free to explore these labs in any order that aligns with your interests or focus on specific areas that match your learning objectives. Happy NGINX configuring!
+MIT – see [LICENSE](LICENSE).

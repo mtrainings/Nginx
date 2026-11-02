@@ -1,0 +1,10 @@
+env/logs/*
+!env/logs/.gitkeep
+env/nginx/certs/*
+!env/nginx/certs/.gitkeep
+env/nginx/auth/*
+!env/nginx/auth/.gitkeep
+env/www/reports/*
+!env/www/reports/.gitkeep
+env/.backup/
+*.gz
