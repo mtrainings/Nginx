@@ -151,7 +151,15 @@ server {
 }
 ```
 
-Stop all three API containers, then `curl -i http://api.localtest.me/`. ✅ **Checkpoint:** `503` with the JSON message. Start them again.
+Stop all three API containers and give the resolver a moment to notice:
+
+```bash
+docker compose -f env/docker-compose.yml stop api-1 api-2 api-3
+sleep 15                      # resolver valid=10s – the names disappear from Docker DNS
+curl -i http://api.localtest.me/
+```
+
+✅ **Checkpoint:** `503` with `all api instances are down` – only the backup is left in the upstream. Curl right after `stop` instead and you will most likely get `api temporarily unavailable`: the names vanish while the request is still trying the dead peers, nginx reports `no live upstreams` and `error_page` (`@api_down`) answers. Both are graceful – discuss which one your clients should see. Start the containers again.
 
 ## Step 7 – Load test
 
@@ -175,4 +183,4 @@ While it runs, stop and start an API instance. Compare the status code distribut
 | `invalid parameter "resolve"` | upstream without `zone`, or nginx older than 1.27.3 |
 | all requests go to one server | `hash` with an empty key (no `X-User` header) |
 | 502 after restarting a container | stale IP – see Step 5 |
-| Step 6 answers `api temporarily unavailable` instead of the backup JSON | the instances went down one by one, their names no longer resolve and the error log shows `no live upstreams` – start all three, wait ~15 s, then stop them together |
+| Step 6 answers `api temporarily unavailable` instead of the backup JSON | curl ran before the resolver dropped the stopped names (`no live upstreams` in the error log) – wait 15 s after `stop` and try again |
