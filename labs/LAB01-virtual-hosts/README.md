@@ -66,7 +66,24 @@ Get to know the helper – you will use it all the time:
    }
    ```
 
-2. Create `env/nginx/conf.d/20-admin.conf` the same way for `admin.localtest.me` with `root /srv/www/admin;`.
+2. Create `env/nginx/conf.d/20-admin.conf`:
+
+   ```nginx
+   server {
+       listen 80;
+       server_name admin.localtest.me;
+
+       root  /srv/www/admin;
+       index index.html;
+
+       location / {
+           try_files $uri $uri/ =404;
+       }
+   }
+   ```
+
+   Every directive ends with `;` – a missing one makes nginx glue the next line onto the directive (`invalid number of arguments in "root"`).
+
 3. Reload and test:
 
    ```bash
@@ -82,9 +99,16 @@ Get to know the helper – you will use it all the time:
 
 ## Part C – Which location wins?
 
-Add these blocks to the **shop** server. The `X-Location` header shows which block handled the request:
+Replace the whole content of `env/nginx/conf.d/10-shop.conf` (the existing `location /` gets a debug header – two `location /` blocks would fail with `duplicate location "/"`). Every block adds an `X-Location` header, so you can see which one handled a request:
 
 ```nginx
+server {
+    listen 80;
+    server_name shop.localtest.me;
+
+    root  /srv/www/shop;
+    index index.html;
+
     location / {
         add_header X-Location "prefix /" always;
         try_files $uri $uri/ =404;
@@ -108,9 +132,20 @@ Add these blocks to the **shop** server. The `X-Location` header shows which blo
         alias /srv/www/docs/;
         add_header X-Location "prefix /docs/ (alias)" always;
     }
+}
 ```
 
-**Before you test – predict!** Fill in the table, then verify with `curl -sI http://shop.localtest.me<URI> | grep -i x-location`.
+```bash
+./bin/ngx reload
+```
+
+**Before you test – predict!** Fill in the table, then verify:
+
+```bash
+for u in /health /assets/logo.svg /img/logo.svg /docs/ /index.html; do
+  echo -n "$u -> "; curl -sI http://shop.localtest.me$u | grep -i x-location || echo "(no header)"
+done
+```
 
 | URI | Your prediction | Result |
 |---|---|---|
@@ -129,6 +164,8 @@ Add these blocks to the **shop** server. The `X-Location` header shows which blo
 </details>
 
 ## Part D – Custom error page
+
+Add these lines inside the shop `server { }` block (before its closing `}`) and reload:
 
 ```nginx
     error_page 404 /404.html;
@@ -150,6 +187,7 @@ Add these blocks to the **shop** server. The `X-Location` header shows which blo
 | Symptom | Likely cause |
 |---|---|
 | `nginx: [emerg] unexpected "}"` | missing `;` on the line above |
+| `invalid number of arguments in "root"` (or any directive) | missing `;` at the end of that line – nginx read the next line as more arguments |
 | 403 Forbidden on `/` | no `index.html` and no `autoindex` |
 | changes are ignored | you forgot `./bin/ngx reload` – or the file does not end in `.conf` |
 | `conflicting server name` warning | the same `server_name` + port is defined twice |
