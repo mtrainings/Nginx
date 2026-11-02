@@ -73,11 +73,14 @@
 4. Test:
 
    ```bash
-   for i in $(seq 1 25); do curl -s -o /dev/null -w "%{http_code} " https://api.localtest.me/; done; echo
+   # 30 requests, 10 at a time - faster than 5 r/s on any machine
+   seq 1 30 | xargs -P 10 -I{} curl -s -o /dev/null -w "%{http_code}\n" https://api.localtest.me/ | sort | uniq -c
    time (for i in $(seq 1 5); do curl -s -o /dev/null -w "%{http_code} " https://api.localtest.me/login; done)
    ```
 
-   ✅ **Checkpoint:** ~11 × `200` then `429`. The login loop is **slowed down** (requests queued at 1 r/s, no `nodelay`) – that's how you throttle brute force without errors.
+   ✅ **Checkpoint:** roughly 11 × `200` and the rest `429` (burst of 10 + the allowed rate). The login loop is **slowed down** to about one request per second (queued, no `nodelay`) – that's how you throttle brute force without returning errors.
+
+   > A plain `for` loop sends one request after another; on a slow machine every HTTPS handshake takes long enough that you never exceed 5 r/s and see no `429`. Test rate limits with **parallel** requests.
 
 5. Upload limit: `head -c 2000000 /dev/zero | curl -s -o /dev/null -w "%{http_code}\n" --data-binary @- https://api.localtest.me/` → `413`.
 

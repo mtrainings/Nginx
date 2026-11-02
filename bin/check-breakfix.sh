@@ -36,7 +36,10 @@ sleep 3
 okc=0; for i in $(seq 1 10); do
   [[ $(req bf6.localtest.me -o /dev/null -w '%{http_code}' http://bf6.localtest.me/) == 200 ]] && okc=$((okc+1))
 done
-codes=$(for i in $(seq 1 60); do req bf6.localtest.me -o /dev/null -w '%{http_code}\n' http://bf6.localtest.me/; done)
+sleep 3
+# flood in parallel - sequential curls can be slower than the allowed rate on slow machines
+codes=$(seq 1 60 | xargs -P 20 -I{} curl -s --max-time 5 --resolve bf6.localtest.me:80:127.0.0.1 \
+          -o /dev/null -w '%{http_code}\n' http://bf6.localtest.me/)
 if [[ $okc -eq 10 ]] && grep -q 429 <<<"$codes" && ! grep -q 503 <<<"$codes"; then
   ok "BF6 rate limiting"; else bad "BF6 rate limiting (burst ok: $okc/10, flood: $(sort <<<"$codes" | uniq -c | tr '\n' ' '))"; fi
 
