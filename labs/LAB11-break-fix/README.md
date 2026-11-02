@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Duration** | 30–45 min (works great in pairs or as a team competition) |
+| **Duration** | ~40 min (works great in pairs or as a team competition) |
 | **You edit** | `env/nginx/conf.d/99-bf-*.conf` |
 | **Score** | `./bin/ngx check` |
 
