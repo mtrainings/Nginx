@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# PixelShop lab helper - run from anywhere:  ./bin/ngx <command>
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_DIR="$ROOT/env"
+NGX_DIRS=(conf.d snippets stream.d modules-enabled njs)
+
+dc() { (cd "$ENV_DIR" && docker compose "$@"); }
+die() { echo "ERROR: $*" >&2; exit 1; }
+
+usage() {
+  cat <<EOF
+Usage: ngx <command>
+
+  up                 start the environment (edge, api-1..3, redis-a/b)
+  down               stop everything (all profiles)
+  ps                 list containers
+  test               nginx -t   (syntax + semantic check)
+  reload             nginx -t && nginx -s reload   (zero-downtime)
+  dump               nginx -T   (print the full effective configuration)
+  logs [file]        follow env/logs/<file>.log (default: access)
+  shell              shell inside the edge container
+  certs              create the local CA + *.localtest.me certificate (LAB05)
+  catchup <N>        replace your config with the solution of LAB N (backup kept)
+  breakfix           deploy the break-fix challenge (LAB11)
+  check              score the break-fix challenge
+EOF
+}
+
+make_certs() { "$ROOT/bin/make-certs.sh"; }
+
+ensure_htpasswd() {
+  local f="$ENV_DIR/nginx/auth/admin.htpasswd"
+  if [[ ! -f "$f" ]]; then
+    printf 'admin:%s\n' "$(openssl passwd -6 'S3cret!')" > "$f"
+    echo "created $f (user: admin / password: S3cret!)"
+  fi
+}
+
+reload() {
+  dc exec -T edge nginx -t && dc exec -T edge nginx -s reload && echo "reloaded"
+}
+
+catchup() {
+  local n; n=$(printf "%02d" "$((10#${1:?lab number}))")
+  local src="$ROOT/solutions/LAB$n"
+  [[ -d "$src" && "$n" != "11" ]] || die "no catch-up available for LAB$n"
+  local bak; bak="$ENV_DIR/.backup/$(date +%Y%m%d-%H%M%S)"
+  mkdir -p "$bak"
+  for d in "${NGX_DIRS[@]}"; do
+    cp -a "$ENV_DIR/nginx/$d" "$bak/" 2>/dev/null || true
+    find "$ENV_DIR/nginx/$d" -mindepth 1 ! -name .gitkeep -delete
+    [[ -d "$src/$d" ]] && cp -a "$src/$d/." "$ENV_DIR/nginx/$d/"
+  done
+  echo "your previous config was saved in $bak"
+  (( 10#$n >= 5 )) && [[ ! -f "$ENV_DIR/nginx/certs/localtest.me.crt" ]] && make_certs
+  (( 10#$n >= 6 )) && ensure_htpasswd
+  reload
+}
+
+breakfix() {
+  for f in "$ROOT"/break-fix/*.conf; do
+    cp "$f" "$ENV_DIR/nginx/conf.d/99-bf-$(basename "$f")"
+  done
+  echo "break-fix scenarios deployed to env/nginx/conf.d/99-bf-*.conf"
+  echo "Testing the configuration (a failure here is part of the challenge):"
+  dc exec -T edge nginx -t || true
+}
+
+case "${1:-help}" in
+  up)       dc up -d ;;
+  down)     dc --profile '*' down ;;
+  ps)       dc ps ;;
+  test)     dc exec -T edge nginx -t ;;
+  reload)   reload ;;
+  dump)     dc exec -T edge nginx -T ;;
+  logs)     tail -n 20 -f "$ENV_DIR/logs/${2:-access}.log" ;;
+  shell)    dc exec edge sh ;;
+  certs)    make_certs ;;
+  catchup)  catchup "${2:-}" ;;
+  breakfix) breakfix ;;
+  check)    "$ROOT/bin/check-breakfix.sh" ;;
+  *)        usage ;;
+esac

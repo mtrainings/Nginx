@@ -1,0 +1,3 @@
+# LAB09 - requires the custom edge image (headers-more dynamic module)
+more_set_headers "Server: PixelShop-Edge";
+more_clear_headers "X-Powered-By";
